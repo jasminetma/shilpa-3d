@@ -17,7 +17,7 @@ export default function LandingPage({ onNavigate }) {
         <img
           src="/assets/main.png"
           alt="Shilpa3D Logo"
-          className="w-[140px] h-auto object-contain"
+          className="w-[600px] h-auto object-contain"
         />
 
         <motion.div
