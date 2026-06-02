@@ -3,8 +3,12 @@ import { motion } from 'framer-motion';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Check, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { FaGoogle, FaFacebookF, FaApple } from "react-icons/fa";
+
 
 export default function SignUpPage({ onNavigate, onSignUp }) {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -172,26 +176,44 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
               <div className="w-full border-t border-border/30" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-card text-muted-foreground">Or login with</span>
+              <span className="px-2 bg-card-foreground text-muted font-mono">Or login with</span>
             </div>
           </div>
 
           {/* Social Login */}
           <div className="grid grid-cols-3 gap-4">
-            {[{ icon: '👍', label: 'Facebook' }, { icon: 'G', label: 'Google' }, { icon: '🍎', label: 'Apple' }].map((social) => (
-              <Button key={social.label} variant="outline" className="border-border/50 text-foreground hover:bg-secondary">
-                {social.icon}
-              </Button>
-            ))}
+            <Button
+              variant="outline"
+              className="!bg-card-foreground border-2 !text-background !border-border h-12 px-5 rounded-xl mt-1"
+              onClick={() => window.location.href = "/api/auth/google"}
+            >
+              <FaGoogle className="h-5 w-5" />
+            </Button>
+
+            <Button
+              variant="outline"
+              className="!bg-card-foreground border-2 !text-background !border-border h-12 px-5 rounded-xl mt-1"
+              onClick={() => window.location.href = "/api/auth/facebook"}
+            >
+              <FaFacebookF className="h-5 w-5" />
+            </Button>
+
+            <Button
+              variant="outline"
+              className="!bg-card-foreground border-2 !text-background !border-border h-12 px-5 rounded-xl mt-1"
+              onClick={() => window.location.href = "/api/auth/apple"}
+            >
+              <FaApple className="h-5 w-5" />
+            </Button>
           </div>
 
           {/* Login link */}
-          <div className="text-center text-sm text-muted-foreground">
+          <div className="text-center text-sm text-muted font-mono">
             Already have an account?{' '}
             <Button
               variant="link"
-              onClick={() => onNavigate('login')}
-              className="text-accent hover:text-accent/80 p-0 h-auto"
+              onClick={() => navigate('login')}
+              className="text-accent hover:text-accent/80 p-0 h-auto font-mono"
             >
               Login
             </Button>

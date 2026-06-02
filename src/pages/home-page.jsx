@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import { Button } from '../components/ui/button';
 import Header from '../components/shared/header';
 import { X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function HomePage({ onNavigate, isLoggedIn, onLogout }) {
+  const navigate = useNavigate();
   const [uploadedImages, setUploadedImages] = useState([]);
   const [selectedMethods, setSelectedMethods] = useState(new Set());
   const [dragActive, setDragActive] = useState(false);
@@ -60,7 +62,7 @@ export default function HomePage({ onNavigate, isLoggedIn, onLogout }) {
     <div className="min-h-screen bg-background">
       <Header onNavigate={onNavigate} onLogout={onLogout} />
 
-      <main className="pt-24 pb-12">
+      <main className="pt-40 pb-12">
         <div className="max-w-7xl mx-auto px-6 space-y-12">
 
           {/* Upload Area */}
@@ -68,25 +70,25 @@ export default function HomePage({ onNavigate, isLoggedIn, onLogout }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className={`rounded-2xl p-12 text-center cursor-pointer transition-all border-2 border-dashed ${
-              dragActive ? 'bg-accent/20 border-accent' : 'bg-secondary/40 border-border/30'
+            className={`rounded-2xl p-24 text-center cursor-pointer transition-all border-2 border-dashed ${
+              dragActive ? 'bg-border/20 border-accent' : 'bg-border/40 border-foreground'
             }`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
             onDrop={handleDrop}
           >
-            <div className="space-y-4">
-              <h2 className="text-3xl md:text-4xl font-serif text-foreground">
+            <div className="space-y-6">
+              <h2 className="text-3xl md:text-4xl font-mono text-foreground">
                 Upload Your Images Here
               </h2>
-              <p className="text-muted-foreground">Drag and Drop or Select Files from Computer</p>
-              <p className="text-sm text-muted-foreground">JPG/PNG 20/40 images</p>
+              <p className="font-mono font-normal text-muted-foreground">Drag and Drop or Select Files from Computer</p>
+              <p className="text-sm font-mono text-muted-foreground">JPG/PNG 20/40 images</p>
 
               <label htmlFor="file-input">
                 <Button
                   asChild
-                  className="bg-accent text-accent-foreground hover:bg-accent/90 px-8 py-6 text-base rounded-full cursor-pointer"
+                  className="bg-accent border border-border-cream text-accent-foreground hover:bg-accent/90 px-8 py-6 text-lg font-medium rounded-full"
                 >
                   <span>Select a File</span>
                 </Button>
@@ -144,32 +146,28 @@ export default function HomePage({ onNavigate, isLoggedIn, onLogout }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="space-y-6"
+            className="space-y-8"
           >
             <div className="text-center">
-              <h3 className="text-2xl font-serif text-foreground">Processing Methods</h3>
-              <p className="text-sm text-muted-foreground mt-2">
-                Select one or both methods to compare results
-              </p>
+              <h3 className="text-2xl font-serif text-foreground">PROCESSING METHODS</h3>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="font-mono grid md:grid-cols-2 gap-6">
               {[
-                { id: 'nerf', name: 'NeRF', description: 'Neural Radiance Fields' },
-                { id: 'gaussian', name: 'Gaussian Splatting', description: '3D Gaussian Splats' },
+                { id: 'nerf', name: 'NeRF' },
+                { id: 'gaussian', name: 'Gaussian Splatting'},
               ].map((method) => (
                 <button
                   key={method.id}
                   onClick={() => toggleMethod(method.id)}
-                  className={`p-6 rounded-2xl border-2 transition-all ${
+                  className={`p-4 rounded-4xl border-2 transition-all ${
                     selectedMethods.has(method.id)
-                      ? 'border-accent bg-accent/10'
-                      : 'border-border/50 bg-secondary/20 hover:border-accent/50'
+                      ? 'border-accent bg-accent/10 hover:bg-accent/20'
+                      : 'border-accent bg-background  hover:border-accent/50'
                   }`}
                 >
                   <div className="text-center space-y-2">
-                    <h4 className="text-lg font-serif text-foreground">{method.name}</h4>
-                    <p className="text-sm text-muted-foreground">{method.description}</p>
+                    <h4 className="text-lg font-serif text-accent">{method.name}</h4>
                   </div>
                 </button>
               ))}
@@ -187,8 +185,8 @@ export default function HomePage({ onNavigate, isLoggedIn, onLogout }) {
               Clear
             </Button>
             <Button
-              onClick={() => onNavigate('processing')}
-              className="bg-accent text-accent-foreground hover:bg-accent/90 px-8 py-6 rounded-full"
+              onClick={() => navigate('/processing')}
+              className="bg-accent border border-border-cream text-accent-foreground hover:bg-accent/90 px-8 py-6 text-lg font-medium rounded-full"
               disabled={uploadedImages.length === 0}
             >
               Start

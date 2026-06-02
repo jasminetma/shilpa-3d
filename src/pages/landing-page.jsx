@@ -2,8 +2,11 @@
 
 import { motion } from 'framer-motion';
 import { Button } from '../components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 export default function LandingPage({ onNavigate }) {
+const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center">
 
@@ -27,7 +30,7 @@ export default function LandingPage({ onNavigate }) {
           className="mt-4"
         >
           <Button
-            onClick={() => onNavigate('login')}
+            onClick={() => navigate('/login')}
             className="bg-accent border border-border-cream text-accent-foreground hover:bg-accent/90 px-8 py-6 text-lg font-medium rounded-full"
           >
             Get Started

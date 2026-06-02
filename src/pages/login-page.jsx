@@ -3,8 +3,11 @@ import { motion } from 'framer-motion';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Checkbox } from '../components/ui/checkbox';
+import { useNavigate } from 'react-router-dom';
 
 export default function LoginPage({ onNavigate, onLogin }) {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -120,7 +123,7 @@ export default function LoginPage({ onNavigate, onLogin }) {
             Don't have an account?{' '}
             <Button
               variant="link"
-              onClick={() => onNavigate('signup')}
+              onClick={() => navigate('/signup')}
               className="text-accent hover:text-accent/80 p-0 h-auto"
             >
               Sign up

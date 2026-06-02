@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './pages/landing-page';
 import LoginPage from './pages/login-page';
 import SignUpPage from './pages/signup-page';
@@ -9,47 +10,24 @@ import ThreeDViewerPage from './pages/3d-viewer-page';
 import HistoryPage from './pages/history-page';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('landing');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [previousPage, setPreviousPage] = useState('home');
 
-  const navigateTo = (page) => {
-    if (['landing', 'login', 'signup', 'home', 'processing', 'results', '3d-viewer', 'history'].includes(page)) {
-      setPreviousPage(currentPage);
-      setCurrentPage(page);
-    }
-  };
-
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    setCurrentPage('home');
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setCurrentPage('landing');
-  };
+  const handleLogin = () => setIsLoggedIn(true);
+  const handleLogout = () => setIsLoggedIn(false);
 
   return (
-    <div className="min-h-screen bg-background">
-      {currentPage === 'landing' && <LandingPage onNavigate={navigateTo} />}
-      {currentPage === 'login' && <LoginPage onNavigate={navigateTo} onLogin={handleLogin} />}
-      {currentPage === 'signup' && <SignUpPage onNavigate={navigateTo} onSignUp={handleLogin} />}
-      {currentPage === 'home' && (
-        <HomePage onNavigate={navigateTo} isLoggedIn={isLoggedIn} onLogout={handleLogout} />
-      )}
-      {currentPage === 'processing' && (
-        <ProcessingPage onNavigate={navigateTo} isLoggedIn={isLoggedIn} onLogout={handleLogout} />
-      )}
-      {currentPage === 'results' && (
-        <ResultsPage onNavigate={navigateTo} isLoggedIn={isLoggedIn} onLogout={handleLogout} />
-      )}
-      {currentPage === '3d-viewer' && (
-        <ThreeDViewerPage onNavigate={navigateTo} isLoggedIn={isLoggedIn} onLogout={handleLogout} />
-      )}
-      {currentPage === 'history' && (
-        <HistoryPage onNavigate={navigateTo} isLoggedIn={isLoggedIn} onLogout={handleLogout} previousPage={previousPage} />
-      )}
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+        <Route path="/signup" element={<SignUpPage onSignUp={handleLogin} />} />
+        <Route path="/home" element={<HomePage isLoggedIn={isLoggedIn} onLogout={handleLogout} />} />
+        <Route path="/processing" element={<ProcessingPage isLoggedIn={isLoggedIn} onLogout={handleLogout} />} />
+        <Route path="/results" element={<ResultsPage isLoggedIn={isLoggedIn} onLogout={handleLogout} />} />
+        <Route path="/3d-viewer" element={<ThreeDViewerPage isLoggedIn={isLoggedIn} onLogout={handleLogout} />} />
+        <Route path="/history" element={<HistoryPage isLoggedIn={isLoggedIn} onLogout={handleLogout} />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </BrowserRouter>
   );
 }

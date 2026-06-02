@@ -3,7 +3,7 @@ import { User } from 'lucide-react';
 export default function Header({ onNavigate, onLogout }) {
   return (
     <header className="fixed top-0 left-0 right-0 border-b border-border/30 backdrop-blur-sm z-50 bg-background/80">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <div className="max-w-7xl mx-auto px-2 py-2 flex justify-between items-center">
 
         {/* Logo */}
         <button
@@ -13,7 +13,7 @@ export default function Header({ onNavigate, onLogout }) {
           <img
             src="/assets/main.png"
             alt="Shilpa3D Logo"
-            className="w-[100px] h-auto object-contain"
+            className="w-[90px] h-auto object-contain"
           />
         </button>
 
