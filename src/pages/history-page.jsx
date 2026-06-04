@@ -4,17 +4,19 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/shared/header';
-import { Trash2, Download, Eye, CheckCircle } from 'lucide-react';
+import { Trash2, Download, Eye, CheckCircle} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const mockHistory = [
   { id: 1, date: '2024/02/06', model: 'Model NeRF' },
   { id: 2, date: '2024/02/06', model: 'Model NeRF' },
 ];
 
-export default function HistoryPage({ onNavigate, isLoggedIn, onLogout, previousPage = 'home' }) {
+export default function HistoryPage({onNavigate, isLoggedIn, onLogout, previousPage = 'home' }) {
   const [deletingId, setDeletingId] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [historyItems, setHistoryItems] = useState(mockHistory);
+  const navigate = useNavigate();
 
   const handleDownload = (id) => {
     const item = historyItems.find((h) => h.id === id);
@@ -43,19 +45,11 @@ export default function HistoryPage({ onNavigate, isLoggedIn, onLogout, previous
     }, 500);
   };
 
-  const handleGoBack = () => {
-    if (previousPage === 'results' || previousPage === '3d-viewer') {
-      onNavigate('results');
-    } else {
-      onNavigate('home');
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Header onNavigate={onNavigate} onLogout={onLogout} />
 
-      <main className="pt-24 pb-12">
+      <main className="pt-32 pb-12">
         <div className="max-w-6xl mx-auto px-6">
           {successMessage && (
             <motion.div
@@ -70,19 +64,16 @@ export default function HistoryPage({ onNavigate, isLoggedIn, onLogout, previous
           )}
 
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="space-y-4 mb-12"
-          >
-            <button
-              onClick={handleGoBack}
-              className="text-foreground hover:text-accent transition-colors flex items-center gap-2"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="space-y-4 mb-12"
             >
-              ← Go Back
-            </button>
-            <h1 className="text-4xl font-serif text-foreground">History</h1>
-          </motion.div>
+
+              <h1 className="text-4xl font-mono text-foreground">
+                History
+              </h1>
+            </motion.div>
 
           <div className="space-y-4">
             {historyItems.map((item, idx) => (
@@ -91,18 +82,18 @@ export default function HistoryPage({ onNavigate, isLoggedIn, onLogout, previous
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: idx * 0.1 }}
-                className="bg-secondary/40 border border-border/30 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
+                className="bg-muted/40 border border-border/60 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
               >
                 <div className="flex gap-6 flex-1">
                   <div className="w-20 h-20 bg-primary/10 rounded-lg flex-shrink-0 overflow-hidden">
-                    <div className="w-full h-full bg-gradient-to-br from-accent/30 to-accent/10 flex items-center justify-center">
-                      <div className="text-2xl font-serif text-accent">📿</div>
+                    <div className="w-full h-full bg-background from-accent/30 to-accent/10 flex items-center justify-center">
+                      {/* <div className="text-2xl font-serif text-accent">📿</div> */}
                     </div>
                   </div>
 
                   <div className="flex-1 space-y-2">
-                    <p className="text-lg text-foreground font-serif">{item.date}</p>
-                    <p className="text-sm text-muted-foreground">{item.model}</p>
+                    <p className="text-lg text-foreground font-mono">{item.date}</p>
+                    <p className="text-sm font-mono text-muted-foreground">{item.model}</p>
                   </div>
                 </div>
 
@@ -110,8 +101,8 @@ export default function HistoryPage({ onNavigate, isLoggedIn, onLogout, previous
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-border/50 text-foreground hover:bg-secondary gap-2"
-                    onClick={() => onNavigate('3d-viewer')}
+                    className="!bg-accent border !border-border-cream !text-accent-foreground !hover:bg-accent/90 px-8 py-6 text-lg font-medium rounded-full"
+                    onClick={() => navigate('/3d-viewer')}
                   >
                     <Eye size={16} />
                     <span className="hidden sm:inline">View</span>
@@ -120,7 +111,7 @@ export default function HistoryPage({ onNavigate, isLoggedIn, onLogout, previous
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-border/50 text-foreground hover:bg-secondary gap-2"
+                    className="!bg-accent border !border-border-cream !text-accent-foreground !hover:bg-accent/90 px-8 py-6 text-lg font-medium rounded-full"
                     onClick={() => handleDownload(item.id)}
                   >
                     <Download size={16} />
@@ -130,7 +121,7 @@ export default function HistoryPage({ onNavigate, isLoggedIn, onLogout, previous
                   <Button
                     variant="outline"
                     size="sm"
-                    className={`border-border/50 text-foreground hover:bg-secondary gap-2 ${
+                    className={`!bg-accent border !border-border-cream !text-accent-foreground !hover:bg-accent/90 px-8 py-6 text-lg font-medium rounded-full ${
                       deletingId === item.id ? 'opacity-50 cursor-wait' : ''
                     }`}
                     onClick={() => handleDelete(item.id)}
@@ -153,7 +144,7 @@ export default function HistoryPage({ onNavigate, isLoggedIn, onLogout, previous
             >
               <p className="text-2xl text-muted-foreground">No reconstructions yet</p>
               <Button
-                onClick={() => onNavigate('home')}
+                onClick={() => navigate('/home')}
                 className="bg-accent text-accent-foreground hover:bg-accent/90 px-8 py-4 rounded-full"
               >
                 Create Your First Model

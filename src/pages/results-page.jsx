@@ -99,7 +99,7 @@ export default function ResultsPage({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="fixed top-24 left-1/2 transform -translate-x-1/2 bg-accent/10 border border-accent/30 text-accent px-6 py-3 rounded-lg flex items-center gap-2 z-50"
+            className="fixed top-28 left-1/2 transform -translate-x-1/2 bg-accent/10 border border-accent/30 text-accent font-mono px-6 py-3 rounded-lg flex items-center gap-2 z-50"
           >
             <CheckCircle size={20} />
             Report exported successfully!

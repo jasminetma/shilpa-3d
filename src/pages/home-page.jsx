@@ -40,6 +40,7 @@ export default function HomePage({ onNavigate, isLoggedIn, onLogout }) {
       const imageUrls = newImages.map((file) => URL.createObjectURL(file));
       setUploadedImages([...uploadedImages, ...imageUrls]);
     }
+    e.target.value = '';
   };
 
   const deleteImage = (indexToDelete) => {
@@ -155,7 +156,7 @@ export default function HomePage({ onNavigate, isLoggedIn, onLogout }) {
             <div className="font-mono grid md:grid-cols-2 gap-6">
               {[
                 { id: 'nerf', name: 'NeRF' },
-                { id: 'gaussian', name: 'Gaussian Splatting'},
+                { id: 'gaussian', name: 'Gaussian Splatting' },
               ].map((method) => (
                 <button
                   key={method.id}
@@ -163,7 +164,7 @@ export default function HomePage({ onNavigate, isLoggedIn, onLogout }) {
                   className={`p-4 rounded-4xl border-2 transition-all ${
                     selectedMethods.has(method.id)
                       ? 'border-accent bg-accent/10 hover:bg-accent/20'
-                      : 'border-accent bg-background  hover:border-accent/50'
+                      : 'border-accent bg-background hover:border-accent/50'
                   }`}
                 >
                   <div className="text-center space-y-2">
@@ -179,7 +180,10 @@ export default function HomePage({ onNavigate, isLoggedIn, onLogout }) {
             <Button
               variant="outline"
               className="border-border/50 text-foreground hover:bg-secondary px-8 py-6 rounded-full"
-              onClick={() => setUploadedImages([])}
+              onClick={() => {
+                setUploadedImages([]);
+                document.getElementById('file-input').value = '';
+              }}
               disabled={uploadedImages.length === 0}
             >
               Clear

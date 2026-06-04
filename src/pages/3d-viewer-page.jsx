@@ -51,7 +51,7 @@ export default function ThreeDViewerPage({
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          className="fixed top-24 left-1/2 transform -translate-x-1/2 bg-accent/10 border border-accent/30 text-accent px-6 py-3  font-mono rounded-lg flex items-center gap-2 z-50"
+          className="fixed top-28 left-1/2 transform -translate-x-1/2 bg-accent/10 border border-accent/30 text-accent px-6 py-3  font-mono rounded-lg flex items-center gap-2 z-50"
         >
           <CheckCircle size={20} />
           Downloaded successfully!
@@ -168,7 +168,7 @@ export default function ThreeDViewerPage({
                 <Button
                   variant="outline"
                   className="w-40 !border-foreground text-foreground font-serif hover:bg-secondary py-6 rounded-full"
-                  onClick={() => onNavigate('home')}
+                  onClick={() => navigate('/home')}
                 >
                   Home
                 </Button>

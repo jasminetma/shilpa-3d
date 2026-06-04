@@ -20,11 +20,12 @@ export default function LoginPage({ onNavigate, onLogin }) {
     formData.password.trim() !== '';
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    if (isFormValid) {
-      onLogin();
-    }
-  };
+  e.preventDefault();
+  if (isFormValid) {
+    onLogin();
+    navigate('/home'); 
+  }
+};
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
@@ -38,7 +39,11 @@ export default function LoginPage({ onNavigate, onLogin }) {
 
           {/* Logo */}
           <div className="flex justify-center mb-4">
-            ç
+            <img
+              src="/assets/main.png"
+              alt="Shilpa3D Logo"
+              className="w-[140px] h-auto object-contain"
+            />
           </div>
 
           {/* Title */}
