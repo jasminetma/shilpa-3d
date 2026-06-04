@@ -4,15 +4,17 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/shared/header';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, ChevronLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
 
 export default function ResultsPage({
-  onNavigate,
   isLoggedIn,
   onLogout,
 }) {
   // Track if export was successful
   const [exportSuccess, setExportSuccess] = useState(false);
+  const navigate = useNavigate();
 
   // Handle report export functionality
   const handleExportReport = () => {
@@ -73,14 +75,26 @@ export default function ResultsPage({
   return (
     <div className="min-h-screen bg-background">
       <Header
-        onNavigate={onNavigate}
+        navigate={navigate}
         onLogout={onLogout}
       />
 
       <main className="pt-24 pb-12">
+       <div className="max-w-7xl mx-auto px-6 my-8">
+          <motion.button
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4 }}
+            onClick={() => navigate('/home')}
+            className="flex items-center text-sm font-mono gap-2 text-secondary-foreground hover:text-accent transition-colors"
+          >
+            <ChevronLeft size={20} />
+            Go Back
+          </motion.button>
+        </div>
         
-        {/* Success message notification */}
-        {exportSuccess && (
+         {/* Success message notification */}
+         {exportSuccess && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -90,9 +104,9 @@ export default function ResultsPage({
             <CheckCircle size={20} />
             Report exported successfully!
           </motion.div>
-        )}
+         )}
 
-        <div className="max-w-7xl mx-auto px-8 py-14 space-y-16">
+         <div className="max-w-7xl mx-auto px-8 py-4 space-y-16">
           
           {/* Title */}
           {/* <motion.div
@@ -208,7 +222,7 @@ export default function ResultsPage({
             {/* Export Report button */}
             <Button
               variant="outline"
-              className="font-mono border-border/50 text-foreground hover:bg-secondary px-8 py-6 rounded-full"
+              className="font-serif !border-foreground text-foreground hover:bg-secondary px-8 py-6 rounded-full"
               onClick={handleExportReport}
             >
               Export Report
@@ -216,8 +230,8 @@ export default function ResultsPage({
 
             {/* Open 3D Viewer button */}
             <Button
-              onClick={() => onNavigate('3d-viewer')}
-              className="bg-accent border border-border-cream text-accent-foreground hover:bg-accent/90 px-8 py-6 font-mono rounded-full"
+              onClick={() => navigate('/3d-viewer')}
+              className="bg-accent border border-border-cream text-accent-foreground hover:bg-accent/90 px-8 py-6 font-serif rounded-full"
             >
               Open 3D Viewer
             </Button>
