@@ -38,11 +38,7 @@ export default function LoginPage({ onNavigate, onLogin }) {
 
           {/* Logo */}
           <div className="flex justify-center mb-4">
-            <img
-              src="/assets/main.png"
-              alt="Shilpa3D Logo"
-              className="w-[140px] h-auto object-contain"
-            />
+            ç
           </div>
 
           {/* Title */}

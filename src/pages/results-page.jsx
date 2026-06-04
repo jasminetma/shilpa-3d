@@ -92,10 +92,10 @@ export default function ResultsPage({
           </motion.div>
         )}
 
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-8 py-14 space-y-16">
           
           {/* Title */}
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -104,10 +104,10 @@ export default function ResultsPage({
             <h1 className="text-4xl font-serif text-foreground text-center">
               Reconstruction Results
             </h1>
-          </motion.div>
+          </motion.div> */}
 
           {/* Results Grid */}
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-2 gap-32">
             
             {/* NeRF Output */}
             <motion.div
@@ -116,53 +116,42 @@ export default function ResultsPage({
               transition={{ duration: 0.6, delay: 0.2 }}
               className="space-y-4"
             >
-              <h2 className="text-2xl font-serif text-foreground text-center">
+              <h2 className="text-2xl font-mono text-foreground">
                 NeRF Output
               </h2>
 
-              <div className="aspect-square bg-secondary/40 border border-border/30 rounded-xl flex items-center justify-center">
+              <div className="w-140 h-120 bg-secondary/40 border border-border/30 rounded-xl flex items-center justify-center">
                 <div className="text-center space-y-4">
-                  <div className="w-32 h-32 bg-gradient-to-br from-accent/30 to-accent/10 rounded-lg mx-auto" />
+                  {/* <div className="w-32 h-32 bg-gradient-to-br from-accent/30 to-accent/10 rounded-lg mx-auto" />
 
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-muted-foreground font-mono text-sm">
                     3D NeRF Reconstruction
-                  </p>
+                  </p> */}
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3 text-center text-sm">
+              <div className="grid grid-cols-3  text-center text-sm">
                 
-                <div className="bg-secondary/40 p-4 rounded-lg border border-border/30">
-                  <p className="text-muted-foreground">
-                    PSNR
-                  </p>
-
-                  <p className="text-lg font-serif text-accent">
-                    29.4
+                <div className="text-accent font-mono">
+                  <p>
+                    PSNR 29.4
                   </p>
                 </div>
 
-                <div className="bg-secondary/40 p-4 rounded-lg border border-border/30">
-                  <p className="text-muted-foreground">
-                    SSIM
-                  </p>
-
-                  <p className="text-lg font-serif text-accent">
-                    0.91
+                <div className="text-accent font-mono">
+                  <p>
+                    SSIM 0.91
                   </p>
                 </div>
 
-                <div className="bg-secondary/40 p-4 rounded-lg border border-border/30">
-                  <p className="text-muted-foreground">
-                    Time
-                  </p>
-
-                  <p className="text-lg font-serif text-accent">
-                    80 MIN
+                <div className="text-foreground font-mono">
+                  <p>
+                    Time 80 MIN
                   </p>
                 </div>
               </div>
             </motion.div>
+
 
             {/* Gaussian Output */}
             <motion.div
@@ -171,49 +160,37 @@ export default function ResultsPage({
               transition={{ duration: 0.6, delay: 0.2 }}
               className="space-y-4"
             >
-              <h2 className="text-2xl font-serif text-foreground text-center">
+              <h2 className="text-2xl font-mono text-foreground text-right">
                 Gaussian Output
               </h2>
 
-              <div className="aspect-square bg-secondary/40 border border-border/30 rounded-xl flex items-center justify-center">
+              <div className="w-140 h-120 bg-secondary/40 border border-border/30 rounded-xl flex items-center justify-center">
                 <div className="text-center space-y-4">
-                  <div className="w-32 h-32 bg-gradient-to-br from-accent/20 to-accent/5 rounded-lg mx-auto" />
+                  {/* <div className="w-32 h-32 bg-gradient-to-br from-accent/20 to-accent/5 rounded-lg mx-auto" /> */}
 
-                  <p className="text-muted-foreground text-sm">
+                  {/* <p className="text-muted-foreground font-mono text-sm">
                     3D Gaussian Splatting
-                  </p>
+                  </p> */}
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3 text-center text-sm">
+              <div className="grid grid-cols-3  text-center text-sm">
                 
-                <div className="bg-secondary/40 p-4 rounded-lg border border-border/30">
-                  <p className="text-muted-foreground">
-                    PSNR
-                  </p>
-
-                  <p className="text-lg font-serif text-accent">
-                    28.1
+                <div className="text-accent font-mono">
+                  <p>
+                    PSNR 28.1
                   </p>
                 </div>
 
-                <div className="bg-secondary/40 p-4 rounded-lg border border-border/30">
-                  <p className="text-muted-foreground">
-                    SSIM
-                  </p>
-
-                  <p className="text-lg font-serif text-accent">
-                    0.89
+                <div className="text-accent font-mono">
+                  <p>
+                    SSIM 0.89
                   </p>
                 </div>
 
-                <div className="bg-secondary/40 p-4 rounded-lg border border-border/30">
-                  <p className="text-muted-foreground">
-                    Time
-                  </p>
-
-                  <p className="text-lg font-serif text-accent">
-                    18 MIN
+                <div className="text-foreground font-mono">
+                  <p>
+                    Time 18 MIN
                   </p>
                 </div>
               </div>
@@ -231,7 +208,7 @@ export default function ResultsPage({
             {/* Export Report button */}
             <Button
               variant="outline"
-              className="border-border/50 text-foreground hover:bg-secondary px-8 py-6 rounded-full"
+              className="font-mono border-border/50 text-foreground hover:bg-secondary px-8 py-6 rounded-full"
               onClick={handleExportReport}
             >
               Export Report
@@ -240,7 +217,7 @@ export default function ResultsPage({
             {/* Open 3D Viewer button */}
             <Button
               onClick={() => onNavigate('3d-viewer')}
-              className="bg-accent text-accent-foreground hover:bg-accent/90 px-8 py-6 rounded-full"
+              className="bg-accent border border-border-cream text-accent-foreground hover:bg-accent/90 px-8 py-6 font-mono rounded-full"
             >
               Open 3D Viewer
             </Button>
