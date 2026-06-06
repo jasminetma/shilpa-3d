@@ -58,7 +58,7 @@ export default function ThreeDViewerPage({
         </motion.div>
       )}
 
-      <main className="pt-38 pb-12">
+      <main className="sm:h-[calc(100vh-9rem)] pt-38 pb-12">
         <div className="max-w-7xl mx-auto px-6">
           <motion.button
             initial={{ opacity: 0, x: -20 }}

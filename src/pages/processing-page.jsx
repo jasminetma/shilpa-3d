@@ -70,7 +70,7 @@ export default function ProcessingPage({
         onLogout={onLogout}
       />
 
-      <main className="pt-32 pb-12">
+      <main className="sm:h-[calc(100vh-9rem)] pt-28 pb-12">
         <div className="max-w-4xl mx-auto px-6 space-y-12 flex flex-col items-center justify-center min-h-[60vh]">
 
           {/* Logo */}

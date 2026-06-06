@@ -63,7 +63,7 @@ export default function HomePage({ onNavigate, isLoggedIn, onLogout }) {
     <div className="min-h-screen bg-background">
       <Header onNavigate={onNavigate} onLogout={onLogout} />
 
-      <main className="pt-40 pb-12">
+      <main className="sm:h-[calc(100vh-9rem)] pt-31 pb-12">
         <div className="max-w-7xl mx-auto px-6 space-y-12">
 
           {/* Upload Area */}

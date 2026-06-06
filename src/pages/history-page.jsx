@@ -49,7 +49,7 @@ export default function HistoryPage({onNavigate, isLoggedIn, onLogout, previousP
     <div className="min-h-screen bg-background">
       <Header onNavigate={onNavigate} onLogout={onLogout} />
 
-      <main className="pt-32 pb-12">
+      <main className="sm:h-[calc(100vh-9rem)] pt-32 pb-12">
         <div className="max-w-6xl mx-auto px-6">
           {successMessage && (
             <motion.div
