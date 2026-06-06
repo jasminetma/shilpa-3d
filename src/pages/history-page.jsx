@@ -49,16 +49,16 @@ export default function HistoryPage({onNavigate, isLoggedIn, onLogout, previousP
     <div className="min-h-screen bg-background">
       <Header onNavigate={onNavigate} onLogout={onLogout} />
 
-      <main className="sm:h-[calc(100vh-9rem)] pt-32 pb-12">
-        <div className="max-w-6xl mx-auto px-6">
+      <main className="sm:h-[calc(100vh-9rem)] pt-32 sm:pt-32 pb-12">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           {successMessage && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="bg-accent/10 border border-accent/30 text-accent p-4 rounded-lg mb-6 flex items-center gap-2"
+              className="bg-accent/10 border border-accent/30 text-accent p-4 rounded-lg mb-6 flex items-center gap-2 text-sm"
             >
-              <CheckCircle size={20} />
+              <CheckCircle size={18} className="shrink-0" />
               {successMessage}
             </motion.div>
           )}
@@ -82,12 +82,11 @@ export default function HistoryPage({onNavigate, isLoggedIn, onLogout, previousP
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: idx * 0.1 }}
-                className="bg-muted/40 border border-border/60 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
+                className="bg-muted/40 border border-border/60 rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6"
               >
                 <div className="flex gap-6 flex-1">
                   <div className="w-20 h-20 bg-primary/10 rounded-lg flex-shrink-0 overflow-hidden">
                     <div className="w-full h-full bg-background from-accent/30 to-accent/10 flex items-center justify-center">
-                      {/* <div className="text-2xl font-serif text-accent">📿</div> */}
                     </div>
                   </div>
 
@@ -97,11 +96,11 @@ export default function HistoryPage({onNavigate, isLoggedIn, onLogout, previousP
                   </div>
                 </div>
 
-                <div className="flex gap-3 flex-shrink-0">
+                <div className="flex gap-2 sm:gap-3 flex-shrink-0 w-full sm:w-auto">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="!bg-accent border !border-border-cream !text-accent-foreground !hover:bg-accent/90 px-8 py-6 text-lg font-medium rounded-full"
+                    className="flex-1 sm:flex-none !bg-accent border !border-border-cream !text-accent-foreground !hover:bg-accent/90 px-4 sm:px-8 py-6 text-lg font-medium rounded-full"
                     onClick={() => navigate('/3d-viewer')}
                   >
                     <Eye size={16} />
@@ -111,7 +110,7 @@ export default function HistoryPage({onNavigate, isLoggedIn, onLogout, previousP
                   <Button
                     variant="outline"
                     size="sm"
-                    className="!bg-accent border !border-border-cream !text-accent-foreground !hover:bg-accent/90 px-8 py-6 text-lg font-medium rounded-full"
+                    className="flex-1 sm:flex-none !bg-accent border !border-border-cream !text-accent-foreground !hover:bg-accent/90 px-4 sm:px-8 py-6 text-lg font-medium rounded-full"
                     onClick={() => handleDownload(item.id)}
                   >
                     <Download size={16} />
@@ -121,7 +120,7 @@ export default function HistoryPage({onNavigate, isLoggedIn, onLogout, previousP
                   <Button
                     variant="outline"
                     size="sm"
-                    className={`!bg-accent border !border-border-cream !text-accent-foreground !hover:bg-accent/90 px-8 py-6 text-lg font-medium rounded-full ${
+                    className={`flex-1 sm:flex-none !bg-accent border !border-border-cream !text-accent-foreground !hover:bg-accent/90 px-4 sm:px-8 py-6 text-lg font-medium rounded-full ${
                       deletingId === item.id ? 'opacity-50 cursor-wait' : ''
                     }`}
                     onClick={() => handleDelete(item.id)}

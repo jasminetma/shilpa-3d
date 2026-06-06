@@ -51,15 +51,15 @@ export default function ThreeDViewerPage({
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          className="fixed top-28 left-1/2 transform -translate-x-1/2 bg-accent/10 border border-accent/30 text-accent px-6 py-3  font-mono rounded-lg flex items-center gap-2 z-50"
+          className="fixed top-28 left-1/2 transform -translate-x-1/2 w-[90vw] max-w-sm bg-accent/10 border border-accent/30 text-accent px-4 py-3 font-mono rounded-lg flex items-center gap-2 z-50 text-sm"
         >
-          <CheckCircle size={20} />
+          <CheckCircle size={18} className="shrink-0" />
           Downloaded successfully!
         </motion.div>
       )}
 
-      <main className="sm:h-[calc(100vh-9rem)] pt-38 pb-12">
-        <div className="max-w-7xl mx-auto px-6">
+      <main className="sm:h-[calc(100vh-9rem)] pt-28 sm:pt-38 pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <motion.button
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -80,20 +80,16 @@ export default function ThreeDViewerPage({
             3D Viewer
           </motion.h1>
 
-          <div className="grid lg:grid-cols-[1.5fr_1fr] gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-6">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
               className="col-span-1"
             >
-              <div className="w-full h-[480px] bg-border/40 border border-border/30 rounded-2xl flex items-center justify-center overflow-hidden relative">
+              <div className="w-full h-[300px] sm:h-[480px] bg-border/40 border border-border/30 rounded-2xl flex items-center justify-center overflow-hidden relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-secondary/20 to-secondary/5 flex items-center justify-center">
                   <div className="text-center space-y-4">
-                    {/* <div className="w-40 h-40 bg-gradient-to-br from-accent/20 to-accent/5 rounded-lg mx-auto animate-pulse" /> */}
-                    {/* <p className="text-muted-foreground">
-                      {model === 'nerf' ? 'NeRF Model' : 'Gaussian Splatting Model'}
-                    </p> */}
                     <p className="text-sm text-secondary-foreground font-mono">Drag-Scroll-Pan</p>
                   </div>
                 </div>
@@ -115,7 +111,6 @@ export default function ThreeDViewerPage({
                 <div className="space-y-3 pt-4 border-t border-border/30">
                   <div className="flex justify-between items-center">
                     <label className="text-sm font-mono text-muted-foreground">Point Size</label>
-                    {/* <span className="text-sm text-accent font-medium">{pointSize}</span> */}
                   </div>
                   <input
                     type="range"
@@ -134,7 +129,6 @@ export default function ThreeDViewerPage({
                 <div className="space-y-3 pt-4">
                   <div className="flex justify-between items-center">
                     <label className="text-sm font-mono text-muted-foreground">Opacity</label>
-                    {/* <span className="text-sm text-accent font-medium">{opacity}%</span> */}
                   </div>
                   <input
                     type="range"
@@ -151,23 +145,23 @@ export default function ThreeDViewerPage({
                 </div>
               </div>
 
-              <div className="flex gap-4 justify-end space-y-3">
+              <div className="flex  gap-3 justify-end">
                 <Button
                   onClick={() => setModel(model === 'nerf' ? 'gaussian' : 'nerf')}
-                  className="w-50 bg-accent border border-border-cream text-accent-foreground hover:bg-accent/90 px-8 py-6 text-sm font-medium font-serif rounded-full"
+                  className="flex-1 sm:flex-none sm:w-50 bg-accent border border-border-cream text-accent-foreground hover:bg-accent/90 px-8 py-6 text-sm font-medium font-serif rounded-full"
                 >
                   {model === 'nerf' ? 'Switch to Gaussian' : 'Switch to NeRF'}
                 </Button>
                 <Button
                   variant="outline"
-                  className="w-40 !border-foreground font-serif text-foreground hover:bg-secondary py-6 rounded-full"
+                  className="flex-1 sm:flex-none sm:w-40 !border-foreground font-serif text-foreground hover:bg-secondary py-6 rounded-full"
                   onClick={handleDownload}
                 >
                   Download
                 </Button>
                 <Button
                   variant="outline"
-                  className="w-40 !border-foreground text-foreground font-serif hover:bg-secondary py-6 rounded-full"
+                  className="flex-1 sm:flex-none sm:w-40 !border-foreground text-foreground font-serif hover:bg-secondary py-6 rounded-full"
                   onClick={() => navigate('/home')}
                 >
                   Home
