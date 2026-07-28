@@ -31,10 +31,9 @@ const navigate = useNavigate();
         >
           <Button
             onClick={() => navigate('/login')}
-            className="bg-accent border border-border-cream text-accent-foreground hover:bg-accent/90 px-8 py-6 text-lg font-medium rounded-full"
-          >
-            Get Started
-          </Button>
+className="bg-accent border border-border-cream text-accent-foreground hover:bg-accent/90 hover:underline hover:underline-offset-3 decoration-1.5 cursor-pointer px-8 py-6 text-lg font-bold rounded-full">
+   Get Started          
+</Button>
         </motion.div>
       </motion.div>
 
