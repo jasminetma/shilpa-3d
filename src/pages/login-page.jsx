@@ -4,6 +4,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Checkbox } from '../components/ui/checkbox';
 import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage({ onNavigate, onLogin }) {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function LoginPage({ onNavigate, onLogin }) {
   });
 
   const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const isFormValid =
     formData.username.trim() !== '' &&
@@ -72,19 +74,36 @@ export default function LoginPage({ onNavigate, onLogin }) {
             </div>
 
             {/* Password */}
-            <div className="space-y-2">
-              <label className="text-sm text-muted font-medium font-mono">
-                Password
-              </label>
-              <Input
-                type="password"
-                placeholder="Enter password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="!bg-secondary-foreground border-2 border-border h-14 px-5 rounded-xl mt-1 text-secondary placeholder:text-secondary/40 font-mono"
-                required
-              />
-            </div>
+              <div className="space-y-2">
+                <label className="text-sm text-muted font-medium font-mono">
+                  Password
+                </label>
+
+                <div className="relative mt-1">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter password"
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                    className="!bg-secondary-foreground border-2 border-border h-14 px-5 pr-12 rounded-xl text-secondary placeholder:text-secondary/40 font-mono"
+                    required
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-4 flex items-center text-muted hover:text-secondary transition-colors"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
+              </div>
 
             {/* Remember me + Forgot password */}
             <div className="flex items-center justify-between text-sm">
