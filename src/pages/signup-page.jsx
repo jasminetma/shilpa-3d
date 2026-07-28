@@ -1,11 +1,21 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Eye, EyeOff } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { Check, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { FaGoogle, FaFacebookF, FaApple } from "react-icons/fa";
+import { FaGoogle } from "react-icons/fa";
 
+// Simple password validation rules — tweak thresholds as you like
+function validatePassword(password) {
+  return {
+    minLength: password.length >= 8,
+    hasUpperCase: /[A-Z]/.test(password),
+    hasLowerCase: /[a-z]/.test(password),
+    hasNumber: /[0-9]/.test(password),
+    hasSpecialChar: /[^A-Za-z0-9]/.test(password),
+  };
+}
 
 export default function SignUpPage({ onNavigate, onSignUp }) {
   const navigate = useNavigate();
@@ -16,17 +26,33 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
     confirmPassword: '',
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
 
-  const validatePassword = (pwd) => ({
-    minLength: pwd.length >= 7,
-    hasUppercase: /[A-Z]/.test(pwd),
-    hasLowercase: /[a-z]/.test(pwd),
-    hasNumber: /[0-9]/.test(pwd),
-    hasSpecial: /[!@#$%^&*]/.test(pwd),
-  });
-
+  // Must be computed before passwordStrength since it depends on it
   const passwordValidation = validatePassword(formData.password);
+
+  // score = how many of the 5 rules pass
+  const passwordScore = Object.values(passwordValidation).filter(Boolean).length;
+
+  const passwordStrength =
+    passwordScore <= 2 ? "Weak" : passwordScore <= 4 ? "Medium" : "Strong";
+
+  const strengthColor =
+    passwordStrength === "Weak"
+      ? "bg-red-500"
+      : passwordStrength === "Medium"
+      ? "bg-orange-400"
+      : "bg-green-500";
+
+  const strengthWidth =
+    passwordStrength === "Weak"
+      ? "w-1/3"
+      : passwordStrength === "Medium"
+      ? "w-2/3"
+      : "w-full";
+
   const isPasswordValid = Object.values(passwordValidation).every((v) => v === true);
   const passwordsMatch = formData.password === formData.confirmPassword && formData.password !== '';
   const isFormValid =
@@ -40,13 +66,20 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
     if (isFormValid) onSignUp();
   };
 
-  const requirements = [
-    { key: 'minLength', label: 'At least 7 characters' },
-    { key: 'hasUppercase', label: 'One uppercase letter (A-Z)' },
-    { key: 'hasLowercase', label: 'One lowercase letter (a-z)' },
-    { key: 'hasNumber', label: 'One number (0-9)' },
-    { key: 'hasSpecial', label: 'One special character (!@#$%^&*)' },
-  ];
+  // Redirects to Google's OAuth consent screen.
+  // Replace this URL with your real backend OAuth endpoint
+  // (e.g. `${API_BASE_URL}/api/auth/google`) once your server route exists.
+  const handleGoogleSignUp = () => {
+    window.location.href = "https://accounts.google.com/o/oauth2/v2/auth";
+  };
+
+  const handleLoginClick = () => {
+    if (onNavigate) {
+      onNavigate('login');
+    } else {
+      navigate('/login');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
@@ -56,115 +89,165 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
         transition={{ duration: 0.6 }}
         className="w-full max-w-md"
       >
-        <div className="bg-card-foreground border border-border/30 rounded-2xl p-8 space-y-6">
+        <div className="bg-card-foreground border border-border/30 rounded-2xl p-5 space-y-3">
 
           {/* Logo */}
           <div className="flex justify-center">
             <img
               src="/assets/main.png"
               alt="Shilpa3D Logo"
-              className="w-[120px] h-auto object-contain"
+              className="w-[72px] h-auto object-contain"
             />
           </div>
 
           {/* Title */}
           <div className="text-center">
-            <h1 className="text-3xl font-serif text-background">Sign Up</h1>
+            <h1 className="text-xl font-serif text-background">Sign Up</h1>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-2.5">
 
             {/* Name */}
-            <div className="space-y-2">
-              <label className="text-sm text-muted font-medium font-mono">Name*</label>
+            <div className="space-y-1">
+              <label className="text-xs text-muted font-medium font-mono">Name*</label>
               <Input
                 type="text"
                 placeholder="Enter your name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="!bg-secondary-foreground border-2 border-border h-14 px-5 rounded-xl mt-1 text-secondary placeholder:text-secondary/40 font-mono"
+                className="!bg-secondary-foreground border-2 border-border h-14 px-5 rounded-lg mt-0.5 text-secondary placeholder:text-secondary/40 font-mono text-sm"
                 required
               />
             </div>
 
             {/* Email */}
-            <div className="space-y-2">
-              <label className="text-sm text-muted font-medium font-mono">Email*</label>
+            <div className="space-y-1">
+              <label className="text-xs text-muted font-medium font-mono">Email*</label>
               <Input
                 type="email"
                 placeholder="Enter your email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="!bg-secondary-foreground border-2 border-border h-14 px-5 rounded-xl mt-1 text-secondary placeholder:text-secondary/40 font-mono"
+                className="!bg-secondary-foreground border-2 border-border h-14 px-5 rounded-lg mt-0.5 text-secondary placeholder:text-secondary/40 font-mono text-sm"
                 required
               />
             </div>
 
             {/* Password */}
-            <div className="space-y-2">
-              <label className="text-sm text-muted font-medium font-mono">Password*</label>
-              <Input
-                type="password"
-                placeholder="Create a password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                onFocus={() => setShowPasswordRequirements(true)}
-                onBlur={() => setShowPasswordRequirements(formData.password === '')}
-                className="!bg-secondary-foreground border-2 border-border h-14 px-5 rounded-xl mt-1 text-secondary placeholder:text-secondary/40 font-mono"
-                required
-              />
+            <div className="space-y-1">
+              <label className="text-xs text-muted font-medium font-mono">
+                Password*
+              </label>
 
-              {showPasswordRequirements && formData.password !== '' && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-secondary/40 border border-border/30 rounded-lg p-4 space-y-2"
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Create a password"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      password: e.target.value,
+                    })
+                  }
+                  className="!bg-secondary-foreground border-2 border-border h-14 px-5 pr-12 rounded-lg text-secondary placeholder:text-secondary/40 font-mono text-sm"
+                  required
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-3 flex items-center text-muted hover:text-secondary"
                 >
-                  <p className="text-xs text-muted-foreground mb-2">Password Requirements:</p>
-                  {requirements.map(({ key, label }) => (
-                    <div key={key} className="flex items-center gap-2 text-xs">
-                      {passwordValidation[key]
-                        ? <Check size={14} className="text-accent" />
-                        : <X size={14} className="text-red-500" />}
-                      <span className={passwordValidation[key] ? 'text-accent' : 'text-muted-foreground'}>
-                        {label}
-                      </span>
-                    </div>
-                  ))}
-                </motion.div>
+                  {showPassword ? (
+                    <EyeOff size={16} />
+                  ) : (
+                    <Eye size={16} />
+                  )}
+                </button>
+              </div>
+
+              {formData.password && (
+                <>
+                  <div className="w-full h-1.5 rounded-full bg-secondary/40 overflow-hidden">
+                    <div
+                      className={`h-full transition-all duration-300 ${strengthColor} ${strengthWidth}`}
+                    />
+                  </div>
+
+                  <p
+                    className={`text-[11px] font-mono ${
+                      passwordStrength === "Weak"
+                        ? "text-red-500"
+                        : passwordStrength === "Medium"
+                        ? "text-orange-400"
+                        : "text-green-500"
+                    }`}
+                  >
+                    Password Strength: {passwordStrength}
+                  </p>
+                </>
               )}
             </div>
-
             {/* Confirm Password */}
-            <div className="space-y-2">
-              <label className="text-sm text-muted font-medium font-mono">Re-enter Password*</label>
-              <Input
-                type="password"
-                placeholder="Confirm password"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                className={`!bg-secondary-foreground border-2 border-border h-14 px-5 rounded-xl mt-1 text-secondary placeholder:text-secondary/40 font-mono ${
-                  formData.confirmPassword && !passwordsMatch ? 'border-red-500' : ''
-                }`}
-                required
-              />
+            <div className="space-y-1">
+              <label className="text-xs text-muted font-medium font-mono">
+                Re-enter Password*
+              </label>
+
+              <div className="relative">
+                <Input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm password"
+                  value={formData.confirmPassword}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      confirmPassword: e.target.value,
+                    })
+                  }
+                  className={`!bg-secondary-foreground border-2 h-14 px-5 pr-12 rounded-lg mt-0.5 text-secondary placeholder:text-secondary/40 font-mono text-sm ${
+                    formData.confirmPassword && !passwordsMatch
+                      ? "border-red-500"
+                      : "border-border"
+                  }`}
+                  required
+                />
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowConfirmPassword(!showConfirmPassword)
+                  }
+                  className="absolute inset-y-0 right-3 flex items-center text-muted hover:text-secondary"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={16} />
+                  ) : (
+                    <Eye size={16} />
+                  )}
+                </button>
+              </div>
+
               {formData.confirmPassword && !passwordsMatch && (
-                <p className="text-xs text-red-500">Passwords do not match</p>
+                <p className="text-[11px] text-red-500">
+                  Passwords do not match
+                </p>
               )}
             </div>
 
             {/* Submit */}
-            <div className="flex justify-center">
+            <div className="flex justify-center pt-1">
               <Button
                 type="submit"
                 disabled={!isFormValid}
-                className={`w-60 py-6 text-lg rounded-full font-serif transition-all ${
-                  isFormValid
-                    ? 'bg-accent text-background hover:bg-accent/90 cursor-pointer'
-                    : 'bg-accent text-background cursor-not-allowed'
-                }`}
-              >
+                className={`w-48 h-14 text-sm rounded-full font-serif transition-all duration-300 ${
+                isFormValid
+                  ? "bg-accent text-background hover:bg-accent/90 cursor-pointer"
+                  : "bg-accent/70 text-background/80 cursor-not-allowed"
+              }`}
+                            >
                 Sign Up
               </Button>
             </div>
@@ -175,44 +258,31 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-border/30" />
             </div>
-            <div className="relative flex justify-center text-sm">
+            <div className="relative flex justify-center text-xs">
               <span className="px-2 bg-card-foreground text-muted font-mono">Or login with</span>
             </div>
           </div>
 
           {/* Social Login */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="flex justify-center">
             <Button
               variant="outline"
-              className="!bg-card-foreground border-2 !text-background !border-border h-12 px-5 rounded-xl mt-1"
-              onClick={() => window.location.href = "/api/auth/google"}
+              type="button"
+              className="w-full h-14 rounded-lg border-2 !bg-card-foreground !border-border !text-background hover:bg-secondary transition-all font-medium gap-2 text-sm"
+              onClick={handleGoogleSignUp}
             >
-              <FaGoogle className="h-5 w-5" />
-            </Button>
-
-            <Button
-              variant="outline"
-              className="!bg-card-foreground border-2 !text-background !border-border h-12 px-5 rounded-xl mt-1"
-              onClick={() => window.location.href = "/api/auth/facebook"}
-            >
-              <FaFacebookF className="h-5 w-5" />
-            </Button>
-
-            <Button
-              variant="outline"
-              className="!bg-card-foreground border-2 !text-background !border-border h-12 px-5 rounded-xl mt-1"
-              onClick={() => window.location.href = "/api/auth/apple"}
-            >
-              <FaApple className="h-5 w-5" />
+              <FaGoogle className="h-4 w-4" />
+              Continue with Google
             </Button>
           </div>
 
           {/* Login link */}
-          <div className="text-center text-sm text-muted font-mono">
+          <div className="text-center text-xs text-muted font-mono">
             Already have an account?{' '}
             <Button
               variant="link"
-              onClick={() => navigate('login')}
+              type="button"
+              onClick={handleLoginClick}
               className="text-accent hover:text-accent/80 p-0 h-auto font-mono"
             >
               Login
