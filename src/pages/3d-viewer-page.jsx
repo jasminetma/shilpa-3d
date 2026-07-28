@@ -6,7 +6,11 @@ import { Button } from '@/components/ui/button';
 import Header from '@/components/shared/header';
 import { ChevronLeft, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Splat } from '@react-three/drei';
 
+// Point this at wherever the .ply lives in /public. See notes below re: file size.
+const SPLAT_SRC = '/assets/models/Statue-1_gaussian.ply';
 
 export default function ThreeDViewerPage({
   isLoggedIn,
@@ -87,12 +91,21 @@ export default function ThreeDViewerPage({
               transition={{ duration: 0.6 }}
               className="col-span-1"
             >
-              <div className="w-full h-[300px] sm:h-[480px] bg-border/40 border border-border/30 rounded-2xl flex items-center justify-center overflow-hidden relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-secondary/20 to-secondary/5 flex items-center justify-center">
-                  <div className="text-center space-y-4">
-                    <p className="text-sm text-secondary-foreground font-mono">Drag-Scroll-Pan</p>
-                  </div>
-                </div>
+              <div className="w-full h-[300px] sm:h-[480px] bg-border/40 border border-border/30 rounded-2xl overflow-hidden relative">
+                <Canvas
+                  camera={{ position: [0, 0, 5], fov: 50 }}
+                  style={{ opacity: opacity / 100 }}
+                  className="!bg-transparent"
+                >
+                  <ambientLight intensity={1} />
+                  <Splat src={SPLAT_SRC} scale={pointSize / 50} />
+                  <OrbitControls makeDefault />
+                </Canvas>
+
+                {/* hint overlay, doesn't block orbit drag */}
+                <p className="absolute bottom-3 left-1/2 -translate-x-1/2 text-xs text-secondary-foreground font-mono pointer-events-none">
+                  Drag-Scroll-Pan
+                </p>
               </div>
             </motion.div>
 
