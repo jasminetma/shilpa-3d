@@ -10,7 +10,7 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Splat } from '@react-three/drei';
 
 // Point this at wherever the .ply lives in /public. See notes below re: file size.
-const SPLAT_SRC = '/assets/models/Statue-1_gaussian.ply';
+const SPLAT_SRC = '/assets/models/Statue-1_gaussian-splat.splat';
 
 export default function ThreeDViewerPage({
   isLoggedIn,
