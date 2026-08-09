@@ -5,7 +5,7 @@ export default function Header({ onNavigate, onLogout }) {
   const navigate = useNavigate();
 
   return (
-    <header className="fixed top-0 left-0 right-0 border-b border-border/30 backdrop-blur-sm z-50 bg-background/80">
+    <header className="fixed top-0 left-0 right-0 border-b border-border/30 z-50 bg-background ">
       <div className="max-w-7xl mx-auto px-2 py-2 flex justify-between items-center">
 
         {/* Logo */}
@@ -40,10 +40,13 @@ export default function Header({ onNavigate, onLogout }) {
           </button>
 
           {/* User Profile */}
-          <div className="flex items-center gap-2 bg-secondary/40 rounded-full px-4 py-2">
+          <button
+            onClick={() => navigate('/account')}
+            className="flex items-center gap-2 bg-secondary/40 rounded-full px-4 py-2 hover:bg-secondary/60 transition-colors"
+          >
             <User size={20} className="text-accent" />
             <span className="text-foreground font-serif">Ram</span>
-          </div>
+          </button>
         </nav>
       </div>
     </header>
