@@ -1,15 +1,41 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Button } from '../components/ui/button';
-import Header from '../components/shared/header';
-import { X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Header from '@/components/shared/header';
+import { X, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { createJob } from '@/lib/api';
+
+const MIN_IMAGES = 20;
+const MAX_IMAGES = 40;
 
 export default function HomePage({ onNavigate, isLoggedIn, onLogout }) {
   const navigate = useNavigate();
+
+  // Two parallel arrays: previews for display, files for the real upload.
+  // The old version only kept object-URL strings and threw the File
+  // objects away, so there was nothing to actually send to a backend.
   const [uploadedImages, setUploadedImages] = useState([]);
-  const [selectedMethods, setSelectedMethods] = useState(new Set());
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+
+  // Both methods on by default since Results always shows both anyway —
+  // previously this started empty with no validation, so Start was
+  // clickable with zero methods selected.
+  const [selectedMethods, setSelectedMethods] = useState(new Set(['nerf', 'gaussian']));
   const [dragActive, setDragActive] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [startError, setStartError] = useState(null);
+
+  const addFiles = (fileList) => {
+    const room = MAX_IMAGES - uploadedFiles.length;
+    if (room <= 0) return;
+
+    const newFiles = Array.from(fileList).slice(0, room);
+    const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
+
+    setUploadedFiles((prev) => [...prev, ...newFiles]);
+    setUploadedImages((prev) => [...prev, ...newPreviews]);
+  };
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -25,26 +51,26 @@ export default function HomePage({ onNavigate, isLoggedIn, onLogout }) {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      const newImages = Array.from(files).slice(0, 40 - uploadedImages.length);
-      const imageUrls = newImages.map((file) => URL.createObjectURL(file));
-      setUploadedImages([...uploadedImages, ...imageUrls]);
-    }
+    if (e.dataTransfer.files?.length > 0) addFiles(e.dataTransfer.files);
   };
 
   const handleFileSelect = (e) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const newImages = Array.from(files).slice(0, 40 - uploadedImages.length);
-      const imageUrls = newImages.map((file) => URL.createObjectURL(file));
-      setUploadedImages([...uploadedImages, ...imageUrls]);
-    }
+    if (e.target.files?.length > 0) addFiles(e.target.files);
     e.target.value = '';
   };
 
   const deleteImage = (indexToDelete) => {
-    setUploadedImages(uploadedImages.filter((_, idx) => idx !== indexToDelete));
+    URL.revokeObjectURL(uploadedImages[indexToDelete]);
+    setUploadedImages((prev) => prev.filter((_, idx) => idx !== indexToDelete));
+    setUploadedFiles((prev) => prev.filter((_, idx) => idx !== indexToDelete));
+  };
+
+  const clearAll = () => {
+    uploadedImages.forEach((url) => URL.revokeObjectURL(url));
+    setUploadedImages([]);
+    setUploadedFiles([]);
+    const input = document.getElementById('file-input');
+    if (input) input.value = '';
   };
 
   const toggleMethod = (method) => {
@@ -54,8 +80,27 @@ export default function HomePage({ onNavigate, isLoggedIn, onLogout }) {
     } else {
       newMethods.add(method);
     }
+    // Keep at least one method selected — a job with zero methods
+    // isn't a valid request.
     if (newMethods.size > 0) {
       setSelectedMethods(newMethods);
+    }
+  };
+
+  const imageCountValid = uploadedFiles.length >= MIN_IMAGES && uploadedFiles.length <= MAX_IMAGES;
+
+  const handleStart = async () => {
+    if (!imageCountValid || selectedMethods.size === 0 || starting) return;
+
+    setStartError(null);
+    setStarting(true);
+
+    try {
+      const { jobId } = await createJob(uploadedFiles, Array.from(selectedMethods));
+      navigate(`/processing/${jobId}`);
+    } catch (err) {
+      setStartError('Could not start processing. Please try again.');
+      setStarting(false);
     }
   };
 
@@ -84,7 +129,7 @@ export default function HomePage({ onNavigate, isLoggedIn, onLogout }) {
                 Upload Your Images Here
               </h2>
               <p className="font-mono font-normal text-muted-foreground">Drag and Drop or Select Files from Computer</p>
-              <p className="text-sm font-mono text-muted-foreground">JPG/PNG 20/40 images</p>
+              <p className="text-sm font-mono text-muted-foreground">JPG/PNG {MIN_IMAGES}-{MAX_IMAGES} images</p>
 
               <label htmlFor="file-input">
                 <Button
@@ -116,8 +161,16 @@ export default function HomePage({ onNavigate, isLoggedIn, onLogout }) {
             >
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-serif text-foreground">Uploaded Images</h3>
-                <span className="text-accent font-serif">{uploadedImages.length}/40</span>
+                <span className={`font-serif ${imageCountValid ? 'text-accent' : 'text-muted-foreground'}`}>
+                  {uploadedImages.length}/{MAX_IMAGES}
+                </span>
               </div>
+
+              {!imageCountValid && (
+                <p className="text-xs font-mono text-muted-foreground">
+                  Need at least {MIN_IMAGES} images for a usable reconstruction.
+                </p>
+              )}
 
               <div className="overflow-x-auto pb-2">
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 min-w-min">
@@ -175,25 +228,33 @@ export default function HomePage({ onNavigate, isLoggedIn, onLogout }) {
             </div>
           </motion.div>
 
+          {startError && (
+            <p className="text-center text-sm font-mono text-destructive">{startError}</p>
+          )}
+
           {/* Actions */}
           <div className="flex gap-4 justify-end">
             <Button
               variant="outline"
               className="border-border/50 text-foreground hover:bg-secondary px-8 py-6 rounded-full"
-              onClick={() => {
-                setUploadedImages([]);
-                document.getElementById('file-input').value = '';
-              }}
-              disabled={uploadedImages.length === 0}
+              onClick={clearAll}
+              disabled={uploadedImages.length === 0 || starting}
             >
               Clear
             </Button>
             <Button
-              onClick={() => navigate('/processing')}
+              onClick={handleStart}
               className="bg-accent border border-border-cream text-accent-foreground hover:bg-accent/90 px-8 py-6 text-lg font-medium rounded-full"
-              disabled={uploadedImages.length === 0}
+              disabled={!imageCountValid || selectedMethods.size === 0 || starting}
             >
-              Start
+              {starting ? (
+                <>
+                  <Loader2 className="animate-spin mr-2" size={18} />
+                  Starting...
+                </>
+              ) : (
+                'Start'
+              )}
             </Button>
           </div>
 
