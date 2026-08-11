@@ -4,14 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/shared/header';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getJobStatus } from '@/lib/api';
+import { getJobStatus, getJobResults } from '@/lib/api';
 
 export default function ProcessingPage({ isLoggedIn, onLogout }) {
   const navigate = useNavigate();
-  const { jobId } = useParams(); // route must be /processing/:jobId
+  const { jobId } = useParams();
 
-  const [stages, setStages] = useState([]);
-  const [currentStage, setCurrentStage] = useState(0);
+  const [stage, setStage] = useState('not_started');
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState(null);
   const [reconnecting, setReconnecting] = useState(false);
@@ -37,19 +36,21 @@ export default function ProcessingPage({ isLoggedIn, onLogout }) {
         setReconnecting(false);
 
         setProgress(data.progress);
-        setCurrentStage(data.currentStage);
-        setStages(data.stages);
+        setStage(data.stage);
 
         if (data.status === 'failed') {
           setError('Processing failed. Please try uploading again.');
-          return; // stop polling
+          return;
         }
 
-        if (data.status === 'complete') {
+        try {
+          await getJobResults(jobId);
           navigateTimer.current = setTimeout(() => {
             if (!cancelled) navigate(`/results/${jobId}`);
           }, 1500);
-          return; // stop polling
+          return;
+        } catch (resultsErr) {
+          // Not ready yet — expected mid-job.
         }
 
         pollTimer.current = setTimeout(poll, 2000);
@@ -58,11 +59,6 @@ export default function ProcessingPage({ isLoggedIn, onLogout }) {
 
         failCount.current += 1;
 
-        // A job here can run for well over an hour. A dropped wifi
-        // connection for a minute shouldn't throw away all that
-        // progress — keep retrying with backoff, just show a subtle
-        // "reconnecting" note, and only give up after a long stretch
-        // of consistent failures.
         if (failCount.current >= 15) {
           setError(
             'Lost connection to the server. Your job may still be running — refreshing this page will resume checking on it.'
@@ -97,11 +93,7 @@ export default function ProcessingPage({ isLoggedIn, onLogout }) {
             transition={{ duration: 0.8 }}
             className="text-center space-y-2"
           >
-            <img
-              src="/assets/main.png"
-              alt="Shilpa3D Logo"
-              className="w-[400px] h-auto object-contain"
-            />
+            <img src="/assets/main.png" alt="Shilpa3D Logo" className="w-[400px] h-auto object-contain" />
           </motion.div>
 
           {error ? (
@@ -112,16 +104,10 @@ export default function ProcessingPage({ isLoggedIn, onLogout }) {
             >
               <p>{error}</p>
               <div className="flex items-center justify-center gap-4">
-                <button
-                  onClick={() => window.location.reload()}
-                  className="underline hover:text-destructive/80"
-                >
+                <button onClick={() => window.location.reload()} className="underline hover:text-destructive/80">
                   Retry now
                 </button>
-                <button
-                  onClick={() => navigate('/home')}
-                  className="underline hover:text-destructive/80"
-                >
+                <button onClick={() => navigate('/home')} className="underline hover:text-destructive/80">
                   Back to upload
                 </button>
               </div>
@@ -151,33 +137,18 @@ export default function ProcessingPage({ isLoggedIn, onLogout }) {
                     transition={{ duration: 0.3 }}
                   />
                 </div>
-                <p className="text-center text-sm text-muted-foreground">
-                  {Math.round(progress)}%
-                </p>
+                <p className="text-center text-sm text-muted-foreground">{Math.round(progress)}%</p>
               </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.6 }}
-                className="bg-background border border-border/60 rounded-2xl p-4 w-full max-w-2xl"
+                className="bg-background border border-border/60 rounded-2xl p-4 w-full max-w-2xl text-center"
               >
-                <div className="space-y-4 font-mono text-sm">
-                  {stages.map((stage, idx) => (
-                    <motion.div
-                      key={idx}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: currentStage >= idx ? 1 : 0.3 }}
-                      transition={{ duration: 0.3 }}
-                      className="text-muted-foreground"
-                    >
-                      <div>{stage.name}</div>
-                      {stage.detail && (
-                        <div className="text-xs mt-1">{stage.detail}</div>
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
+                <p className="font-mono text-sm text-muted-foreground capitalize">
+                  {stage.replace(/_/g, ' ')}
+                </p>
               </motion.div>
             </>
           )}

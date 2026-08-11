@@ -1,11 +1,11 @@
 import { User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-export default function Header({ onNavigate, onLogout }) {
+export default function Header({ onNavigate, onLogout, username }) {
   const navigate = useNavigate();
 
   return (
-    <header className="fixed top-0 left-0 right-0 border-b border-border/30 z-50 bg-background ">
+    <header className="fixed top-0 left-0 right-0 border-b border-border/30 z-50 bg-background">
       <div className="max-w-7xl mx-auto px-2 py-2 flex justify-between items-center">
 
         {/* Logo */}
@@ -40,13 +40,12 @@ export default function Header({ onNavigate, onLogout }) {
           </button>
 
           {/* User Profile */}
-          <button
-            onClick={() => navigate('/account')}
-            className="flex items-center gap-2 bg-secondary/40 rounded-full px-4 py-2 hover:bg-secondary/60 transition-colors"
-          >
+          <div 
+          onClick={() => navigate('/account')}
+          className="flex items-center gap-2 bg-secondary/40 rounded-full px-4 py-2">
             <User size={20} className="text-accent" />
-            <span className="text-foreground font-serif">Ram</span>
-          </button>
+            <span className="text-foreground font-serif">{username || 'User'}</span>
+          </div>
         </nav>
       </div>
     </header>

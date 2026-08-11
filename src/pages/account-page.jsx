@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../components/ui/button';
@@ -13,15 +14,13 @@ const QUALITIES = ['Low', 'Standard', 'High'];
 const RECONSTRUCTIONS = ['Gaussian Splat', 'NeRF'];
 
 const DEFAULT_PROFILE = {
-  avatar: null, // null = show initial-letter placeholder
+  avatar: null,
   name: 'Morty Smith',
   language: 'English',
   country: 'United States',
   quality: 'Standard',
   reconstruction: 'Gaussian Splat',
 };
-
-/* ---------------------------- Shared bits ------------------------------ */
 
 function FieldLabel({ children }) {
   return (
@@ -75,8 +74,6 @@ function ModalShell({ onClose, children, width = 'max-w-sm' }) {
     </motion.div>
   );
 }
-
-/* --------------------------- Avatar upload ------------------------------ */
 
 function AvatarUploadModal({ currentAvatar, onClose, onSave }) {
   const [preview, setPreview] = useState(currentAvatar);
@@ -174,8 +171,6 @@ function AvatarUploadModal({ currentAvatar, onClose, onSave }) {
   );
 }
 
-/* --------------------------- Confirm modal ------------------------------ */
-
 function ConfirmModal({ title, description, confirmLabel, danger, onCancel, onConfirm }) {
   return (
     <ModalShell onClose={onCancel} width="max-w-md">
@@ -213,8 +208,6 @@ function ConfirmModal({ title, description, confirmLabel, danger, onCancel, onCo
   );
 }
 
-/* ------------------------------ Page ------------------------------------ */
-
 export default function AccountSettingsPage({ onLogout }) {
   const navigate = useNavigate();
 
@@ -251,7 +244,6 @@ export default function AccountSettingsPage({ onLogout }) {
 
   const handleDeleteAccount = () => {
     setShowDeleteConfirm(false);
-    // Hook this up to your real delete-account request, then log the user out.
     onLogout?.();
     navigate('/');
   };
@@ -260,7 +252,6 @@ export default function AccountSettingsPage({ onLogout }) {
     <div className="h-screen overflow-hidden bg-[#F6EFE8]">
       <Header onLogout={onLogout} />
 
-      {/* -------------------------------- Body -------------------------------- */}
       <motion.main
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -269,7 +260,6 @@ export default function AccountSettingsPage({ onLogout }) {
       >
         <h1 className="text-3xl font-serif text-[#1F0F0B] mb-6">Account Settings</h1>
 
-        {/* Avatar */}
         <div className="flex items-center gap-4 mb-6">
           <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[#E3D5C7] bg-gradient-to-br from-[#4E9DDE] via-[#1F0F0B] to-[#4EDE8E] flex items-center justify-center shrink-0">
             {form.avatar ? (
@@ -298,7 +288,6 @@ export default function AccountSettingsPage({ onLogout }) {
           </button>
         </div>
 
-        {/* Name — click to edit */}
         <div className="mb-6">
           <FieldLabel>Name</FieldLabel>
           {editingName ? (
@@ -323,19 +312,16 @@ export default function AccountSettingsPage({ onLogout }) {
           )}
         </div>
 
-        {/* Language */}
         <div className="mb-6">
           <FieldLabel>Language</FieldLabel>
           <SelectField value={form.language} onChange={(v) => update('language', v)} options={LANGUAGES} />
         </div>
 
-        {/* Country */}
         <div className="mb-6">
           <FieldLabel>Country</FieldLabel>
           <SelectField value={form.country} onChange={(v) => update('country', v)} options={COUNTRIES} />
         </div>
 
-        {/* Quality + Reconstruction */}
         <div className="grid grid-cols-2 gap-5 mb-12">
           <div>
             <FieldLabel>Standard Quality</FieldLabel>
@@ -347,7 +333,6 @@ export default function AccountSettingsPage({ onLogout }) {
           </div>
         </div>
 
-        {/* Actions */}
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
             <Button
@@ -386,7 +371,6 @@ export default function AccountSettingsPage({ onLogout }) {
         </div>
       </motion.main>
 
-      {/* ------------------------------ Toast ------------------------------ */}
       <AnimatePresence>
         {savedToast && (
           <motion.div
@@ -401,7 +385,6 @@ export default function AccountSettingsPage({ onLogout }) {
         )}
       </AnimatePresence>
 
-      {/* ------------------------------ Modals ------------------------------ */}
       <AnimatePresence>
         {showAvatarModal && (
           <AvatarUploadModal

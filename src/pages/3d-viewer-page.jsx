@@ -1,26 +1,27 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/shared/header';
 import { ChevronLeft, CheckCircle, Loader2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Splat } from '@react-three/drei';
-import { getJobModels, getJobStatus } from '@/lib/api';
+import * as GaussianSplats3D from '@mkkellogg/gaussian-splats-3d';
+import { getJobModels } from '@/lib/api';
 
 export default function ThreeDViewerPage({ isLoggedIn, onLogout }) {
-  const [model, setModel] = useState('gaussian'); // 'gaussian' | 'nerf'
-  const [pointSize, setPointSize] = useState(50);
-  const [opacity, setOpacity] = useState(80);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [models, setModels] = useState(null);
   const [loadError, setLoadError] = useState(null);
+  const [viewerError, setViewerError] = useState(null);
   const [retryKey, setRetryKey] = useState(0);
   const navigate = useNavigate();
-  const { jobId } = useParams(); // route must be /3d-viewer/:jobId
+  const { jobId } = useParams();
 
+  const containerRef = useRef(null);
+  const viewerRef = useRef(null);
+
+  // Fetch model URLs
   useEffect(() => {
     if (!jobId) {
       setLoadError('No job ID found.');
@@ -32,21 +33,6 @@ export default function ThreeDViewerPage({ isLoggedIn, onLogout }) {
 
     async function load() {
       try {
-        // Guard against landing here (e.g. a bookmark) before the job
-        // actually finished processing.
-        const status = await getJobStatus(jobId);
-        if (cancelled) return;
-
-        if (status.status === 'failed') {
-          setLoadError('This job failed during processing.');
-          return;
-        }
-
-        if (status.status !== 'complete') {
-          navigate(`/processing/${jobId}`);
-          return;
-        }
-
         const data = await getJobModels(jobId);
         if (!cancelled) setModels(data);
       } catch (err) {
@@ -59,25 +45,57 @@ export default function ThreeDViewerPage({ isLoggedIn, onLogout }) {
     return () => {
       cancelled = true;
     };
-  }, [jobId, navigate, retryKey]);
+  }, [jobId, retryKey]);
 
-  const activeModel = models?.[model]; // { type: 'splat'|'video', url }
-  const isSplat = activeModel?.type === 'splat';
-  const isVideo = activeModel?.type === 'video';
+  // Mount the gaussian-splats-3d viewer once we have a real .ply URL
+  useEffect(() => {
+    const gaussianUrl = models?.gaussian?.url;
+    if (!gaussianUrl || !containerRef.current) return;
 
-  const handleDownload = () => {
-    if (!activeModel?.url) return;
+    setViewerError(null);
 
+    const viewer = new GaussianSplats3D.Viewer({
+      rootElement: containerRef.current,
+      cameraUp: [0, -1, 0],
+      initialCameraPosition: [0, 0, 5],
+      initialCameraLookAt: [0, 0, 0],
+    });
+    viewerRef.current = viewer;
+
+    viewer
+      .addSplatScene(gaussianUrl, {
+        format: GaussianSplats3D.SceneFormat.Ply,
+        splatAlphaRemovalThreshold: 5,
+      })
+      .then(() => {
+        viewer.start();
+      })
+      .catch((err) => {
+        console.error('Failed to load splat scene:', err);
+        setViewerError('Could not load the 3D model. The file may be missing or malformed.');
+      });
+
+    return () => {
+      try {
+        viewerRef.current?.dispose();
+      } catch (e) {
+        // dispose can throw if the viewer never fully initialized — safe to ignore
+      }
+      viewerRef.current = null;
+    };
+  }, [models]);
+
+  const handleDownloadGaussian = () => {
+    if (!models?.gaussian?.url) return;
     const link = document.createElement('a');
-    link.href = activeModel.url;
-    link.download = `shilpa3d-${model}-model-${new Date().getTime()}${
-      isSplat ? '.splat' : '.mp4'
-    }`;
+    link.href = models.gaussian.url;
+    link.download = `shilpa3d-gaussian-model-${new Date().getTime()}.ply`;
     link.click();
-
     setDownloadSuccess(true);
     setTimeout(() => setDownloadSuccess(false), 3000);
   };
+
+  const hasGaussian = !!models?.gaussian?.url;
 
   return (
     <div className="min-h-screen bg-background">
@@ -136,40 +154,32 @@ export default function ThreeDViewerPage({ isLoggedIn, onLogout }) {
                 className="col-span-1"
               >
                 <div className="w-full h-[300px] sm:h-[480px] bg-border/40 border border-border/30 rounded-2xl overflow-hidden relative">
-                  {!activeModel && (
+                  {!models && (
                     <div className="w-full h-full flex items-center justify-center">
                       <Loader2 className="animate-spin text-muted-foreground" size={28} />
                     </div>
                   )}
 
-                  {isSplat && (
-                    <Canvas
-                      camera={{ position: [0, 0, 5], fov: 50 }}
-                      style={{ opacity: opacity / 100 }}
-                      className="!bg-transparent"
-                    >
-                      <ambientLight intensity={1} />
-                      <Splat src={activeModel.url} scale={pointSize / 50} />
-                      <OrbitControls makeDefault />
-                    </Canvas>
+                  {models && !hasGaussian && (
+                    <div className="w-full h-full flex items-center justify-center px-6 text-center">
+                      <p className="text-sm font-mono text-muted-foreground">
+                        No Gaussian Splatting model is available for this job.
+                      </p>
+                    </div>
                   )}
 
-                  {isVideo && (
-                    <video
-                      className="w-full h-full object-cover"
-                      style={{ opacity: opacity / 100 }}
-                      src={activeModel.url}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      controls
-                    />
+                  {viewerError && (
+                    <div className="absolute inset-0 flex items-center justify-center px-6 text-center bg-border/40">
+                      <p className="text-sm font-mono text-destructive">{viewerError}</p>
+                    </div>
                   )}
 
-                  {activeModel && (
+                  {/* gaussian-splats-3d mounts its own canvas into this div */}
+                  <div ref={containerRef} className="w-full h-full" />
+
+                  {hasGaussian && !viewerError && (
                     <p className="absolute bottom-3 left-1/2 -translate-x-1/2 text-xs text-secondary-foreground font-mono pointer-events-none">
-                      {isSplat ? 'Drag-Scroll-Pan' : 'Pre-rendered orbit'}
+                      Drag-Scroll-Pan
                     </p>
                   )}
                 </div>
@@ -184,67 +194,23 @@ export default function ThreeDViewerPage({ isLoggedIn, onLogout }) {
                 <div className="bg-background border border-2 border-dashed border-border/60 rounded-2xl p-6 space-y-4">
                   <div className="space-y-2">
                     <h3 className="font-mono text-foreground">Model</h3>
-                    <p className="text-2xl font-mono text-accent">
-                      {model === 'nerf' ? 'NeRF' : 'GAUSSIAN'}
+                    <p className="text-2xl font-mono text-accent">GAUSSIAN SPLAT</p>
+                  </div>
+
+                  {!hasGaussian && models && (
+                    <p className="text-sm font-mono text-muted-foreground pt-2 border-t border-border/30">
+                      NeRF output currently has no interactive or video preview —
+                      the pipeline produces individual frames, not a viewable file yet.
                     </p>
-                  </div>
-
-                  {/* Point size only affects the splat renderer */}
-                  {isSplat && (
-                    <div className="space-y-3 pt-4 border-t border-border/30">
-                      <div className="flex justify-between items-center">
-                        <label className="text-sm font-mono text-muted-foreground">
-                          Point Size
-                        </label>
-                      </div>
-                      <input
-                        type="range"
-                        min={0}
-                        max={100}
-                        step={1}
-                        value={pointSize}
-                        onChange={(e) => setPointSize(Number(e.target.value))}
-                        className="w-full h-2 bg-secondary rounded-full appearance-none cursor-pointer accent-accent"
-                        style={{
-                          background: `linear-gradient(to right, #d4a574 0%, #d4a574 ${pointSize}%, #3a3328 ${pointSize}%, #3a3328 100%)`,
-                        }}
-                      />
-                    </div>
                   )}
-
-                  <div className="space-y-3 pt-4">
-                    <div className="flex justify-between items-center">
-                      <label className="text-sm font-mono text-muted-foreground">
-                        Opacity
-                      </label>
-                    </div>
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      step={1}
-                      value={opacity}
-                      onChange={(e) => setOpacity(Number(e.target.value))}
-                      className="w-full h-2 bg-secondary rounded-full appearance-none cursor-pointer accent-accent"
-                      style={{
-                        background: `linear-gradient(to right, #d4a574 0%, #d4a574 ${opacity}%, #3a3328 ${opacity}%, #3a3328 100%)`,
-                      }}
-                    />
-                  </div>
                 </div>
 
                 <div className="flex gap-3 justify-end">
                   <Button
-                    onClick={() => setModel(model === 'nerf' ? 'gaussian' : 'nerf')}
-                    className="flex-1 sm:flex-none sm:w-50 bg-accent border border-border-cream text-accent-foreground hover:bg-accent/90 px-8 py-6 text-sm font-medium font-serif rounded-full"
-                  >
-                    {model === 'nerf' ? 'Switch to Gaussian' : 'Switch to NeRF'}
-                  </Button>
-                  <Button
                     variant="outline"
                     className="flex-1 sm:flex-none sm:w-40 !border-foreground font-serif text-foreground hover:bg-secondary py-6 rounded-full"
-                    onClick={handleDownload}
-                    disabled={!activeModel}
+                    onClick={handleDownloadGaussian}
+                    disabled={!hasGaussian}
                   >
                     Download
                   </Button>

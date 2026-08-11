@@ -4,49 +4,32 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/shared/header';
-import { CheckCircle, ChevronLeft, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, ChevronLeft, Loader2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getJobResults, getJobStatus } from '@/lib/api';
+import { getJobResults } from '@/lib/api';
 
-function PreviewBox({ result }) {
-  if (!result) {
+function StatusBadge({ success }) {
+  if (success) {
     return (
-      <div className="w-full aspect-[4/3] bg-secondary/40 border border-border/30 rounded-xl flex items-center justify-center">
-        <Loader2 className="animate-spin text-muted-foreground" size={24} />
-      </div>
+      <span className="inline-flex items-center gap-1.5 text-accent font-mono text-sm">
+        <CheckCircle size={16} /> Succeeded
+      </span>
     );
   }
-
-  if (result.previewType === 'video') {
-    return (
-      <video
-        className="w-full aspect-[4/3] bg-secondary/40 border border-border/30 rounded-xl object-cover"
-        src={result.previewUrl}
-        autoPlay
-        muted
-        loop
-        playsInline
-      />
-    );
-  }
-
-  // Falls back to a static image preview if previewType === 'image'
   return (
-    <img
-      className="w-full aspect-[4/3] bg-secondary/40 border border-border/30 rounded-xl object-cover"
-      src={result.previewUrl}
-      alt={result.name}
-    />
+    <span className="inline-flex items-center gap-1.5 text-destructive font-mono text-sm">
+      <XCircle size={16} /> Not available
+    </span>
   );
 }
 
 export default function ResultsPage({ isLoggedIn, onLogout }) {
   const [exportSuccess, setExportSuccess] = useState(false);
-  const [results, setResults] = useState(null);
+  const [manifest, setManifest] = useState(null);
   const [loadError, setLoadError] = useState(null);
   const [retryKey, setRetryKey] = useState(0);
   const navigate = useNavigate();
-  const { jobId } = useParams(); // route must be /results/:jobId
+  const { jobId } = useParams();
 
   useEffect(() => {
     if (!jobId) {
@@ -59,25 +42,10 @@ export default function ResultsPage({ isLoggedIn, onLogout }) {
 
     async function load() {
       try {
-        // Someone could land here via a bookmark or a stale link before
-        // the job is actually done — check first instead of assuming.
-        const status = await getJobStatus(jobId);
-        if (cancelled) return;
-
-        if (status.status === 'failed') {
-          setLoadError('This job failed during processing.');
-          return;
-        }
-
-        if (status.status !== 'complete') {
-          navigate(`/processing/${jobId}`);
-          return;
-        }
-
         const data = await getJobResults(jobId);
-        if (!cancelled) setResults(data);
+        if (!cancelled) setManifest(data);
       } catch (err) {
-        if (!cancelled) setLoadError('Could not load results for this job.');
+        if (!cancelled) setLoadError('Results are not ready yet for this job.');
       }
     }
 
@@ -86,16 +54,16 @@ export default function ResultsPage({ isLoggedIn, onLogout }) {
     return () => {
       cancelled = true;
     };
-  }, [jobId, navigate, retryKey]);
+  }, [jobId, retryKey]);
 
   const handleExportReport = () => {
-    if (!results) return;
+    if (!manifest) return;
 
     const reportData = {
       exportDate: new Date().toISOString(),
       project: 'Shilpa3D Reconstruction',
       jobId,
-      results,
+      manifest,
     };
 
     const reportJson = JSON.stringify(reportData, null, 2);
@@ -110,6 +78,8 @@ export default function ResultsPage({ isLoggedIn, onLogout }) {
     setExportSuccess(true);
     setTimeout(() => setExportSuccess(false), 3000);
   };
+
+  const hasAnyOutput = manifest?.nerf_success || manifest?.gaussian_success;
 
   return (
     <div className="min-h-screen bg-background">
@@ -144,7 +114,8 @@ export default function ResultsPage({ isLoggedIn, onLogout }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-10 sm:space-y-16">
           {loadError ? (
             <div className="text-center space-y-3">
-              <p className="font-mono text-destructive">{loadError}</p>
+              <Loader2 className="animate-spin mx-auto text-muted-foreground" size={24} />
+              <p className="font-mono text-muted-foreground">{loadError}</p>
               <button
                 onClick={() => setRetryKey((k) => k + 1)}
                 className="underline text-sm font-mono text-muted-foreground hover:text-accent"
@@ -152,85 +123,98 @@ export default function ResultsPage({ isLoggedIn, onLogout }) {
                 Try again
               </button>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-16 lg:gap-32">
-              {/* NeRF Output */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="space-y-4"
-              >
-                <h2 className="text-xl sm:text-2xl font-mono text-foreground">
-                  NeRF Output
-                </h2>
-
-                <PreviewBox result={results?.nerf} />
-
-                <div className="grid grid-cols-3 text-center text-xs sm:text-sm">
-                  <div className="text-accent font-mono">
-                    <p>PSNR {results?.nerf?.psnr ?? '--'}</p>
-                  </div>
-                  <div className="text-accent font-mono">
-                    <p>SSIM {results?.nerf?.ssim ?? '--'}</p>
-                  </div>
-                  <div className="text-foreground font-mono">
-                    <p>Time {results?.nerf?.processingTime ?? '--'}</p>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Gaussian Output */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="space-y-4"
-              >
-                <h2 className="text-xl sm:text-2xl font-mono text-foreground lg:text-right">
-                  Gaussian Output
-                </h2>
-
-                <PreviewBox result={results?.gaussian} />
-
-                <div className="grid grid-cols-3 text-center text-xs sm:text-sm">
-                  <div className="text-accent font-mono">
-                    <p>PSNR {results?.gaussian?.psnr ?? '--'}</p>
-                  </div>
-                  <div className="text-accent font-mono">
-                    <p>SSIM {results?.gaussian?.ssim ?? '--'}</p>
-                  </div>
-                  <div className="text-foreground font-mono">
-                    <p>Time {results?.gaussian?.processingTime ?? '--'}</p>
-                  </div>
-                </div>
-              </motion.div>
+          ) : !manifest ? (
+            <div className="flex justify-center py-20">
+              <Loader2 className="animate-spin text-muted-foreground" size={28} />
             </div>
+          ) : (
+            <>
+              <div className="text-center space-y-1">
+                <h1 className="text-2xl sm:text-3xl font-serif text-foreground">
+                  {manifest.statue || 'Reconstruction'}
+                </h1>
+                <p className="text-sm font-mono text-muted-foreground">
+                  {manifest.image_count ?? '--'} images processed
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-16 lg:gap-32">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="space-y-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl sm:text-2xl font-mono text-foreground">NeRF Output</h2>
+                    <StatusBadge success={manifest.nerf_success} />
+                  </div>
+
+                  <div className="w-full aspect-[4/3] bg-secondary/40 border border-border/30 rounded-xl flex items-center justify-center px-6 text-center">
+                    {manifest.nerf_success ? (
+                      <p className="text-sm font-mono text-muted-foreground">
+                        NeRF training finished. A stitched preview video isn't available yet —
+                        the pipeline currently produces individual rendered frames rather than a video file.
+                      </p>
+                    ) : (
+                      <p className="text-sm font-mono text-muted-foreground">
+                        NeRF wasn't run or didn't complete for this job.
+                      </p>
+                    )}
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="space-y-4"
+                >
+                  <div className="flex items-center justify-between lg:flex-row-reverse">
+                    <h2 className="text-xl sm:text-2xl font-mono text-foreground">Gaussian Output</h2>
+                    <StatusBadge success={manifest.gaussian_success} />
+                  </div>
+
+                  <div className="w-full aspect-[4/3] bg-secondary/40 border border-border/30 rounded-xl flex items-center justify-center px-6 text-center">
+                    {manifest.gaussian_success ? (
+                      <p className="text-sm font-mono text-muted-foreground">
+                        Gaussian Splatting model is ready — open it in the 3D Viewer.
+                      </p>
+                    ) : (
+                      <p className="text-sm font-mono text-muted-foreground">
+                        Gaussian Splatting wasn't run or didn't complete for this job.
+                      </p>
+                    )}
+                  </div>
+                </motion.div>
+              </div>
+            </>
           )}
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mt-8 sm:mt-12"
-          >
-            <Button
-              variant="outline"
-              className="w-full sm:w-auto font-serif !border-foreground text-foreground hover:bg-secondary px-8 py-6 rounded-full"
-              onClick={handleExportReport}
-              disabled={!results}
+          {manifest && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mt-8 sm:mt-12"
             >
-              Export Report
-            </Button>
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto font-serif !border-foreground text-foreground hover:bg-secondary px-8 py-6 rounded-full"
+                onClick={handleExportReport}
+              >
+                Export Report
+              </Button>
 
-            <Button
-              onClick={() => navigate(`/3d-viewer/${jobId}`)}
-              className="w-full sm:w-auto bg-accent border border-border-cream text-accent-foreground hover:bg-accent/90 px-8 py-6 font-serif rounded-full"
-              disabled={!results}
-            >
-              Open 3D Viewer
-            </Button>
-          </motion.div>
+              <Button
+                onClick={() => navigate(`/3d-viewer/${jobId}`)}
+                className="w-full sm:w-auto bg-accent border border-border-cream text-accent-foreground hover:bg-accent/90 px-8 py-6 font-serif rounded-full"
+                disabled={!hasAnyOutput}
+              >
+                Open 3D Viewer
+              </Button>
+            </motion.div>
+          )}
         </div>
       </main>
     </div>
