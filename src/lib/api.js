@@ -20,7 +20,7 @@ import {
   MOCK_MODELS,
   MOCK_HISTORY,
   mockStatusForJob,
-} from './mockData';
+} from './mockdata';
 
 const USE_MOCK = true;
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
